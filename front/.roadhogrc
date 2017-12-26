@@ -1,6 +1,6 @@
 {
   "entry": "src/index.js",
-  "disableCSSModules": true,
+  "disableCSSModules": false,
   "env": {
     "development": {
       "extraBabelPlugins": [
