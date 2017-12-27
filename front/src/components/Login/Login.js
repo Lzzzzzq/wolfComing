@@ -10,17 +10,52 @@ import password from "../../assets/lock.png";
 import logo from "../../assets/react.png";
 
 export default class Login extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            username: '',
+            password: ''
+        }
+    }
+
+    componentDidMount() {
+        console.log('change');
+    }
+
+    usernameChange(e) { // 输入用户名
+        let username = e.target.value;
+        this.setState({
+            username: username
+        });
+    }
+
+    passwordChange(e) { // 输入密码
+        let password = e.target.value;
+        this.setState({
+            password: password
+        });
+    }
+
+    handleLogIn() { // 登录被点击
+        this.props.logIn(this.state.username, this.state.password);
+    }
+
+    handlePress(e) {
+        if (e.which === 13) {
+            this.props.logIn(this.state.username, this.state.password);
+        }
+    }
     render() {
         return (
             <div className={styles.inputOutWrap}>
                 <div className={styles.inputWrapLogoBox}>
-                    <img src={logo} className={styles.inputWrapLogo} alt=""/>
+                    <img src={wolf} className={styles.inputWrapLogo} alt=""/>
                     <div className={styles.inputWrapLogoText}>
-                        Wolf Coming
+                        {/*Wolf Coming*/}
                     </div>
                 </div>
                 <div className={styles.inputWrap}>
-                    <img src={wolf} className={styles.inputLogo} alt=""/>
+                    <img src={logo} className={styles.inputLogo} alt=""/>
                     <div className={
                         classnames({
                             [styles.inputItemWrap]: true,
@@ -28,7 +63,15 @@ export default class Login extends Component {
                         })
                     }>
                         <img src={username} className={styles.inputItemLogo} alt=""/>
-                        <input type="text" className={styles.inputItem}/>
+                        <input
+                            type="text"
+                            className={styles.inputItem}
+                            onChange={this.usernameChange.bind(this)}
+                            onClick={(e) => {
+                                e.target.focus()
+                            }}
+                            onKeyPress={this.handlePress.bind(this)}
+                        />
                     </div>
                     <div className={
                         classnames({
@@ -37,11 +80,23 @@ export default class Login extends Component {
                         })
                     }>
                         <img src={password} className={styles.inputItemLogo} alt=""/>
-                        <input type="password" className={styles.inputItem}/>
+                        <input
+                            type="password"
+                            className={styles.inputItem}
+                            onChange={this.passwordChange.bind(this)}
+                            onClick={(e) => {
+                                e.target.focus()
+                            }}
+                            onKeyPress={this.handlePress.bind(this)}
+                        />
                     </div>
-                    <div className={styles.inputSignIn}>Sign In</div>
+                    <div
+                        className={styles.inputSignIn}
+                        onClick={this.handleLogIn.bind(this)}
+                    >Sign In
+                    </div>
                 </div>
-                <div className={styles.inputSignUp}>Sign Up</div>
+                {/*<div className={styles.inputSignUp}>Sign Up</div>*/}
                 <div className={styles.wrapUnder}></div>
             </div>
         )
