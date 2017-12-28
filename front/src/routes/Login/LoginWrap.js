@@ -4,23 +4,26 @@
 import React, {Component} from "react";
 import {Button, Toast, WhiteSpace, WingBlank} from "antd-mobile";
 import {connect} from "react-redux";
+import {routerRedux} from "dva/router";
 import Login from "../../components/Login/Login";
 
-class LoginWrap extends Component {
-    constructor(props) {
-        super();
-        this.state = {};
-    }
+var login = false;
 
+class LoginWrap extends Component {
     componentWillReceiveProps(nextProps) {
         let user = nextProps.user;
         if (user.loading) {
-            Toast.loading('正在登录', 30);
+            Toast.loading('正在登录', 30, function () {
+            }, true);
         } else {
             Toast.hide();
         }
-        if (user.login) {
-            Toast.success('登录成功', 2);
+        if (user.login && !login) {
+            Toast.success('登录成功', 2, function () {
+                nextProps.history.push({
+                    pathname: '/main',
+                });
+            }, true);
         }
         if (user.err) {
             Toast.fail(user.msg, 2);
@@ -49,6 +52,7 @@ class LoginWrap extends Component {
     componentDidMount() {
         this.setState(this.props.user);
     }
+
     render() {
         return (
             <div className="wrap">

@@ -14,6 +14,18 @@ export default {
         msg: ''
     },
 
+    subscriptions: {
+        setup({dispatch, history}) {
+            history.listen(location => {
+                if (location.pathname.includes('main')) {
+                    console.log('main');
+                } else if (location.pathname === '/') {
+                    console.log('log');
+                }
+            });
+        },
+    },
+    
     reducers: {
         loading(state, data){
             return {
