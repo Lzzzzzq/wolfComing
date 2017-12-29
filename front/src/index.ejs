@@ -7,6 +7,25 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>wolfComing</title>
     <script src="https://as.alipayobjects.com/g/component/fastclick/1.0.6/fastclick.js"></script>
+
+    <script>
+        (function (doc, win) {
+            var docElm = doc.documentElement,
+                resizeEvt = 'orientationchange' in win ? 'orientationchange' : 'resize',
+                recalc = function () {
+                    var clientWidth = docElm.clientWidth;
+                    if (!clientWidth) {
+                        return;
+                    }
+                    docElm.style.fontSize = clientWidth / 7.5 + 'px';
+                };
+            if (!doc.addEventListener) {
+                return;
+            }
+            win.addEventListener(resizeEvt, recalc, false);
+            doc.addEventListener('DOMContentLoaded', recalc, false);
+        })(document, window)
+    </script>
     <script>
         if ('addEventListener' in document) {
             document.addEventListener('DOMContentLoaded', function () {
