@@ -6,6 +6,7 @@ let service = require('./socket');
 let socketList = {};
 let itemList = {};
 let matchList = [];
+let gameList = {};
 
 io.on('connection', function (socket) { // 有新的连接
     console.log('a user connect');
@@ -15,7 +16,22 @@ io.on('connection', function (socket) { // 有新的连接
         console.log('a user disconnected');
         if (socketList[socket.id]) {
             try {
+                // 从匹配队列中移除
+                for (let i = 0; i < matchList.length; i++) {
+                    if (matchList[i].name === socketList[socket.id].info.name) {
+                        matchList.splice(i, 1);
+                    }
+                }
+                if (gameList[socketList[socket.id].info.name].with) {
+                    let leaveItemWithName = gameList[socketList[socket.id].info.name].with;
+                    // 删除对战列表中对方数据
+                    delete gameList[leaveItemWithName];
+                    // 删除对战列表中逃跑方数据
+                    delete gameList[socketList[socket.id].info.name].with;
+                }
+                // 从玩家列表中移除
                 delete itemList[socketList[socket.id].info.name];
+                // 从socket列表中移除
                 delete socketList[socket.id];
             } catch (err) {
                 console.log(err);
@@ -64,6 +80,7 @@ io.on('connection', function (socket) { // 有新的连接
                         }
                     }
                     service.matchBoth(playerA, playerB);
+                    gameList = service.addGameList(gameList, playerA, playerB);
                     matchList.splice(matchIndex, 1);
                 } else { // 有可以匹配的玩家(阵营相同)
                     if (service.getRandom() >= 50) {
@@ -73,6 +90,7 @@ io.on('connection', function (socket) { // 有新的连接
                         let playerB = matchList[0];
                         playerB.socket = socketList[itemList[matchList[0].name]];
                         service.matchBoth(playerA, playerB);
+                        gameList = service.addGameList(gameList, playerA, playerB);
                     } else {
                         let playerA = data;
                         playerA.socket = socketList[itemList[data.name]];
@@ -80,6 +98,7 @@ io.on('connection', function (socket) { // 有新的连接
                         playerB.socket = socketList[itemList[matchList[0].name]];
                         playerB.camp = otherCamp;
                         service.matchBoth(playerA, playerB);
+                        gameList = service.addGameList(gameList, playerA, playerB);
                     }
                     matchList.shift();
                 }
@@ -98,6 +117,7 @@ io.on('connection', function (socket) { // 有新的连接
                     playerA.camp = (playerB.camp === 'wolf' ? 'sheep' : 'wolf');
                     playerB.socket = socketList[itemList[matchList[matchIndex].name]];
                     service.matchBoth(playerA, playerB);
+                    gameList = service.addGameList(gameList, playerA, playerB);
                     matchList.splice(matchIndex, 1);
                 } else { // 有可以匹配的玩家(阵营相同)
                     if (service.getRandom() >= 50) {
@@ -108,6 +128,7 @@ io.on('connection', function (socket) { // 有新的连接
                         playerB.socket = socketList[itemList[matchList[0].name]];
                         playerA.camp = 'sheep';
                         service.matchBoth(playerA, playerB);
+                        gameList = service.addGameList(gameList, playerA, playerB);
                     } else {
                         let playerA = data;
                         playerA.socket = socketList[itemList[data.name]];
@@ -116,10 +137,36 @@ io.on('connection', function (socket) { // 有新的连接
                         playerB.socket = socketList[itemList[matchList[0].name]];
                         playerB.camp = 'wolf';
                         service.matchBoth(playerA, playerB);
+                        gameList = service.addGameList(gameList, playerA, playerB);
                     }
                     matchList.shift();
                 }
             }
+        }
+    });
+
+    socket.on('matchCancel', function (data) { // 取消匹配
+        let name = data.name;
+        let matchIndex = -1;
+        for (let i = 0; i < matchList.length; i++) {
+            if (matchList[i].name === name) {
+                matchIndex = i;
+            }
+        }
+        if (matchIndex >= 0) {
+            matchList.splice(matchIndex, 1);
+        }
+    });
+
+    socket.on('getGameInfo', function (data) {
+        let name = data.name;
+        console.log(gameList);
+        console.log(name + ' get info');
+        console.log(data);
+        console.log(gameList[name]);
+        if (gameList[name]) {
+            console.log('send info to ' + name);
+            socket.emit('gameInfo', gameList[name]);
         }
     })
 

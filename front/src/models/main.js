@@ -1,9 +1,11 @@
 /**
  * Created by Lzzzzzq on 2017/12/28.
  */
+import {routerRedux} from "dva/router";
 import * as socket from "../services/socket";
 
 let socketConnect = false;
+let gameState = false;
 
 export default {
 
@@ -14,7 +16,8 @@ export default {
         msg: '',
         info: '',
         oppositeInfo: '',
-        matchSuccess: false
+        matchSuccess: false,
+        gameInfo: {}
     },
 
     subscriptions: {
@@ -38,9 +41,24 @@ export default {
                             type: 'matchSuccess',
                             payload: data
                         });
+                    case 'gameInfo':
+                        console.log(data);
+                        dispatch({
+                            type: 'setGameInfo',
+                            payload: data
+                        })
                 }
             })
-        }
+        },
+        setup({dispatch, history}) { // 监听路由
+            history.listen(location => {
+                if (location.pathname === '/game') {
+                    dispatch({
+                        type: 'checkGameState'
+                    })
+                }
+            });
+        },
     },
 
     reducers: {
@@ -69,12 +87,20 @@ export default {
             }
         },
         matchSuccess(state, payload){
+            gameState = true;
             return {
                 ...state,
                 err: false,
                 msg: '',
                 oppositeInfo: payload.payload.oppositeInfo,
                 matchSuccess: true
+            }
+        },
+        setGameInfo(state, payload){
+            // todo 设置游戏信息
+            return {
+                ...state,
+                gameInfo: payload.payload.gameInfo
             }
         }
     },
@@ -86,6 +112,21 @@ export default {
         *startMatch({payload}, {call, put}){ // 开始匹配
             console.log(payload);
             yield call(socket.matchStart, payload);
+        },
+        *matchCancel({payload}, {call, put}){ // 取消匹配
+            console.log('match cancel');
+            yield call(socket.matchCancel, payload);
+        },
+        *goGame({payload}, {put}){ // 重定向
+            yield put(routerRedux.push('/game'));
+        },
+        *checkGameState({payload}, {put}){
+            // if(!gameState){
+            //     yield put(routerRedux.push('/main'));
+            // }
+        },
+        *getGameInfo({payload}, {call, put}){
+            yield call(socket.getGameInfo, payload);
         }
     }
 

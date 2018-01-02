@@ -34,13 +34,28 @@ export function setInfo(data) { // 向socket发送设置info
     })
 }
 
-export function matchStart(data) {
+export function matchStart(data) { // 开始匹配
     return new Promise((resolve, reject) => {
         console.log(data);
         socket.emit('matchStart', data);
+        resolve();
+    })
+}
+
+export function matchCancel(data) { // 取消匹配
+    return new Promise((resolve, reject) => {
+        socket.emit('matchCancel', data);
+        resolve();
     })
 }
 
 export function setLocalInfo(data) {
     gameInfo = data;
+}
+
+export function getGameInfo(data) {
+    return new Promise((resolve, reject) => {
+        socket.emit('getGameInfo', data);
+        resolve();
+    })
 }

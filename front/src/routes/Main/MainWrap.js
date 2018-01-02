@@ -50,11 +50,30 @@ class MainWrap extends Component {
         })
     }
 
+    matchCancel() {
+        let {dispatch, main} = this.props;
+        dispatch({
+            type: 'main/matchCancel',
+            payload: {
+                name: main.info.name
+            }
+        })
+    }
+
+    goGame() {
+        let {dispatch} = this.props;
+        dispatch({
+            type: 'main/goGame'
+        })
+    }
+
     render() {
         return (
             <div className="wrap">
                 <Main
                     startMatch={this.startMatch.bind(this)}
+                    matchCancel={this.matchCancel.bind(this)}
+                    goGame={this.goGame.bind(this)}
                     main={this.state.main}
                 />
             </div>

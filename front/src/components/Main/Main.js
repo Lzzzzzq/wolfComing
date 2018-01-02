@@ -25,6 +25,7 @@ export default class Main extends Component {
     };
 
     matchCancel() { // 取消匹配
+        this.props.matchCancel();
         this.setState({
             matchLoading: false
         });
@@ -51,7 +52,8 @@ export default class Main extends Component {
                     clearInterval(timer);
                     this.setState({
                         matchOpposite: false
-                    })
+                    });
+                    this.props.goGame();
                 }
             }, 1000);
         }

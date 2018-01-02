@@ -19,16 +19,16 @@ class LoginWrap extends Component {
             Toast.hide();
         }
         if (user.login && !login) {
-            // nextProps.history.push({
-            //     pathname: '/main',
-            // });
-            Toast.success('登录成功', 1, function () {
-                setTimeout(() => {
-                    nextProps.history.push({
-                        pathname: '/main',
-                    });
-                }, 200)
-            }, true);
+            nextProps.history.push({
+                pathname: '/main',
+            });
+            // Toast.success('登录成功', 1, function () {
+            //     setTimeout(() => {
+            //         nextProps.history.push({
+            //             pathname: '/main',
+            //         });
+            //     }, 200)
+            // }, true);
         }
         if (user.err) {
             Toast.fail(user.msg, 2);
