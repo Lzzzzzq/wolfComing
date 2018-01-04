@@ -20,6 +20,18 @@ export function socketListen(action) { // socket监听
             type: 'matchSuccess',
             oppositeInfo: data
         });
+    });
+    socket.on('gameInfo', function (data) {
+        action({
+            type: 'gameInfo',
+            gameInfo: data
+        })
+    });
+    socket.on('createWolf', function (data) {
+        action({
+            type: 'createWolf',
+            gameInfo: data
+        })
     })
 }
 
@@ -56,6 +68,14 @@ export function setLocalInfo(data) {
 export function getGameInfo(data) {
     return new Promise((resolve, reject) => {
         socket.emit('getGameInfo', data);
+        resolve();
+    })
+}
+
+export function createWolf(gameState) {
+    return new Promise((resolve, reject) => {
+        console.log(gameState);
+        socket.emit('createWolf', gameState);
         resolve();
     })
 }

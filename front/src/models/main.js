@@ -41,12 +41,19 @@ export default {
                             type: 'matchSuccess',
                             payload: data
                         });
+                        break;
                     case 'gameInfo':
-                        console.log(data);
                         dispatch({
                             type: 'setGameInfo',
                             payload: data
-                        })
+                        });
+                        break;
+                    case 'createWolf':
+                        dispatch({
+                            type: 'createWolfPos',
+                            payload: data
+                        });
+                        break;
                 }
             })
         },
@@ -97,10 +104,18 @@ export default {
             }
         },
         setGameInfo(state, payload){
-            // todo 设置游戏信息
             return {
                 ...state,
                 gameInfo: payload.payload.gameInfo
+            }
+        },
+        createWolfPos(state, payload){
+            let gameInfo = state.gameInfo;
+            gameInfo.gameState = payload.payload.gameInfo;
+            console.log(gameInfo);
+            return {
+                ...state,
+                gameInfo: gameInfo
             }
         }
     },
@@ -127,6 +142,10 @@ export default {
         },
         *getGameInfo({payload}, {call, put}){
             yield call(socket.getGameInfo, payload);
+        },
+        *createWolf({payload}, {call, put}){
+            console.log(payload);
+            yield call(socket.createWolf, payload)
         }
     }
 

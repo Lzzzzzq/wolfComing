@@ -22,13 +22,13 @@ io.on('connection', function (socket) { // 有新的连接
                         matchList.splice(i, 1);
                     }
                 }
-                if (gameList[socketList[socket.id].info.name].with) {
-                    let leaveItemWithName = gameList[socketList[socket.id].info.name].with;
-                    // 删除对战列表中对方数据
-                    delete gameList[leaveItemWithName];
-                    // 删除对战列表中逃跑方数据
-                    delete gameList[socketList[socket.id].info.name].with;
-                }
+                // if (gameList[socketList[socket.id].info.name].with) {
+                //     let leaveItemWithName = gameList[socketList[socket.id].info.name].with;
+                //     // 删除对战列表中对方数据
+                //     delete gameList[leaveItemWithName];
+                //     // 删除对战列表中逃跑方数据
+                //     delete gameList[socketList[socket.id].info.name].with;
+                // }
                 // 从玩家列表中移除
                 delete itemList[socketList[socket.id].info.name];
                 // 从socket列表中移除
@@ -158,7 +158,7 @@ io.on('connection', function (socket) { // 有新的连接
         }
     });
 
-    socket.on('getGameInfo', function (data) {
+    socket.on('getGameInfo', function (data) { // 获取游戏信息
         let name = data.name;
         console.log(gameList);
         console.log(name + ' get info');
@@ -167,11 +167,23 @@ io.on('connection', function (socket) { // 有新的连接
         if (gameList[name]) {
             console.log('send info to ' + name);
             socket.emit('gameInfo', gameList[name]);
+            // socket.emit('gameInfo', gameList[name]);
         }
+    })
+
+    socket.on('createWolf', function (data) {
+        console.log('createWolf: ');
+        console.log(data.name);
+        gameList[data.name].gameState = data;
+        let withName = gameList[data.name].with;
+        let withSocketId = itemList[withName];
+        console.log(withName);
+        console.log(withSocketId);
+        socketList[withSocketId].emit('createWolf', data);
     })
 
 });
 
 http.listen(3000, function () {
-    console.log('listening on *:3000');
+    console.log('listening on *:3000'); 
 });

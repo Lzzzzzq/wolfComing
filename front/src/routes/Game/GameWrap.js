@@ -6,6 +6,9 @@ import {connect} from "react-redux";
 import Game from "../../components/Game/Game";
 
 class GameWrap extends Component {
+    state = {
+        gameInfo: {}
+    };
     componentDidMount() {
         console.log(this.props);
         let {dispatch, user} = this.props;
@@ -17,14 +20,37 @@ class GameWrap extends Component {
         })
     }
 
+    componentWillReceiveProps(nextProps) {
+        console.log(nextProps);
+        let {user, main} = nextProps;
+        if (main.gameInfo.name) {
+            this.setState({
+                gameInfo: main.gameInfo
+            })
+        }
+    }
+
     gameInit() {
         let {user} = this.props;
+    }
+
+    createWolf(gameState) {
+        let {user, dispatch} = this.props;
+        gameState.name = user.info.name;
+        console.log(gameState);
+        dispatch({
+            type: 'main/createWolf',
+            payload: gameState
+        })
     }
 
     render() {
         return (
             <div className="wrap">
-                <Game/>
+                <Game
+                    gameInfo={this.state.gameInfo}
+                    createWolf={this.createWolf.bind(this)}
+                />
             </div>
         )
     }

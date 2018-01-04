@@ -21,6 +21,8 @@ let service = {
         list[B.name] = B;
         list[A.name].with = B.name;
         list[B.name].with = A.name;
+        list[A.name].state = 0;
+        list[B.name].state = 0;
         if (list[A.name].socket) {
             delete list[A.name].socket;
         }
@@ -35,6 +37,7 @@ let service = {
                 [0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0]
             ];
+            list[A.name].turn = true;
             list[B.name].chessData = [
                 [0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0],
@@ -42,6 +45,7 @@ let service = {
                 [1, 1, 1, 1, 1],
                 [1, 1, 1, 1, 1]
             ];
+            list[B.name].turn = false;
         } else {
             list[A.name].chessData = [
                 [0, 0, 0, 0, 0],
@@ -50,6 +54,7 @@ let service = {
                 [1, 1, 1, 1, 1],
                 [1, 1, 1, 1, 1]
             ];
+            list[A.name].turn = false;
             list[B.name].chessData = [
                 [1, 1, 1, 1, 1],
                 [1, 1, 1, 1, 1],
@@ -57,6 +62,7 @@ let service = {
                 [0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0]
             ];
+            list[B.name].turn = true;
         }
         return list;
     }
