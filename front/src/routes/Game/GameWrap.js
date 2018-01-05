@@ -44,12 +44,29 @@ class GameWrap extends Component {
         })
     }
 
+    chessMove(data, camp) {
+        console.log(data);
+        let {dispatch, main, user} = this.props;
+        console.log(main);
+        console.log(user);
+        dispatch({
+            type: 'main/chessMove',
+            payload: {
+                chessMoveData: data,
+                name: main.info.name,
+                camp: camp,
+                with: main.oppositeInfo.name
+            }
+        })
+    }
+
     render() {
         return (
             <div className="wrap">
                 <Game
                     gameInfo={this.state.gameInfo}
                     createWolf={this.createWolf.bind(this)}
+                    chessMove={this.chessMove.bind(this)}
                 />
             </div>
         )

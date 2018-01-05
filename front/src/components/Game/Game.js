@@ -8,6 +8,7 @@ import styles from "./Game.less";
 
 // let init = false;
 // let wolfIndex = [];
+let createWolf = false;
 const logo = {
     wolf: 'http://ohaw6xm8w.bkt.clouddn.com/wolfnew.png',
     sheep: 'http://ohaw6xm8w.bkt.clouddn.com/sheepnew.png'
@@ -26,7 +27,8 @@ export default class Game extends Component {
         init: false,
         chessMoveData: [],
         turnBoxShow: false,
-        wolfIndex: []
+        wolfIndex: [],
+        activeChess: {}
     };
 
     componentDidMount() {
@@ -39,7 +41,7 @@ export default class Game extends Component {
             console.log(nextProps.gameInfo);
             let {camp, chessData, state, turn} = nextProps.gameInfo;
             this.formatChessData(camp, chessData, state, turn);
-            if (nextProps.gameInfo.gameState) {
+            if (nextProps.gameInfo.gameState && !createWolf) {
                 if (nextProps.gameInfo.state === 0 && nextProps.gameInfo.camp === 'sheep' && nextProps.gameInfo.gameState.camp === 'wolf') {
                     let wolfIndex = nextProps.gameInfo.gameState.wolfIndex;
                     let createWolfPos = [];
@@ -53,7 +55,9 @@ export default class Game extends Component {
                             }
                         })
                     }
-                    this.updateChess(createWolfPos);
+                    console.log('createWolf');
+                    this.updateChess(createWolfPos, wolfIndex);
+                    createWolf = true;
                 }
             }
         }
@@ -119,12 +123,16 @@ export default class Game extends Component {
         if (wolfIndex) {
             this.setState({
                 chessMoveData: chessRes,
-                wolfIndex: wolfIndex
+                wolfIndex: wolfIndex,
+                activeChess: {}
             })
         } else {
+            console.log(123);
             this.setState({
-                chessMoveData: chessRes
-            })
+                chessMoveData: chessRes,
+                activeChess: {}
+            });
+            this.props.chessMove(chessRes, this.state.camp);
         }
     }
 
@@ -171,10 +179,84 @@ export default class Game extends Component {
         })
     }
 
+    chooseChess(index, type, remove) { // 选择棋子
+        let {activeChess} = this.state;
+        if (!remove) {
+            activeChess = {
+                type: type,
+                index: index
+            };
+        } else {
+            activeChess = {};
+        }
+        this.setState({
+            activeChess: activeChess
+        })
+    }
+
+    moveChess(index) { // 移动棋子
+        let {chessMoveData} = this.state;
+        let pos = {
+            x: index % 5,
+            y: parseInt(index / 5)
+        };
+        let activePos = {
+            x: this.state.activeChess.index % 5,
+            y: parseInt(this.state.activeChess.index / 5)
+        };
+        if ((pos.x === activePos.x && ((pos.y - 1) === activePos.y || (pos.y + 1) === activePos.y)) ||
+            (pos.y === activePos.y && ((pos.x - 1) === activePos.x || (pos.x + 1) === activePos.x))
+        ) {
+            let moveArr = [];
+            moveArr.push({
+                camp: this.state.activeChess.type,
+                index: index,
+                pos: pos
+            });
+            moveArr.push({
+                camp: 'space',
+                index: this.state.activeChess.index,
+                pos: activePos
+            });
+            this.updateChess(moveArr);
+        }
+    };
+
+    eatSheep(index) {
+        let {chessMoveData} = this.state;
+        let pos = {
+            x: index % 5,
+            y: parseInt(index / 5)
+        };
+        let activePos = {
+            x: this.state.activeChess.index % 5,
+            y: parseInt(this.state.activeChess.index / 5)
+        };
+        if (
+            (pos.x === activePos.x && (pos.y + 2) === activePos.y && chessMoveData[index + 5].type === 'space') ||
+            (pos.x === activePos.x && (pos.y - 2) === activePos.y && chessMoveData[index - 5].type === 'space') ||
+            (pos.y === activePos.y && (pos.x - 2) === activePos.x && chessMoveData[index - 1].type === 'space') ||
+            (pos.y === activePos.y && (pos.x + 2) === activePos.x && chessMoveData[index + 1].type === 'space')
+        ) {
+            let moveArr = [];
+            moveArr.push({
+                index: index,
+                camp: 'wolf',
+                pos: pos
+            });
+            moveArr.push({
+                index: this.state.activeChess.index,
+                camp: 'space',
+                pos: activePos
+            });
+            this.updateChess(moveArr);
+        }
+    }
+
     handleClick(ele, index) { // 界面被点击
         if (!this.state.turn) return;
 
-        if (this.state.camp === 'wolf' && !this.state.init) {
+        if (this.state.camp === 'wolf' && !this.state.init) { // 选狼阶段
             if (ele.type === 'space') { // 如果点击了空地
                 if (this.state.wolfIndex.length < 3) {
                     console.log('add wolf');
@@ -182,6 +264,22 @@ export default class Game extends Component {
                 }
             } else if (ele.type === 'wolf') {
                 this.removeWolf(index);
+            }
+        } else if (this.state.camp === 'wolf' && this.state.init) { // 狼走阶段
+            if (!this.state.activeChess.type) { // 还未选中棋子
+                if (ele.type === 'wolf') {
+                    this.chooseChess(index, 'wolf');
+                }
+            } else { // 已选中棋子
+                if (ele.type === 'wolf' && index !== this.state.activeChess.index) {
+                    this.chooseChess(index, 'wolf');
+                } else if (ele.type === 'wolf' && index === this.state.activeChess.index) {
+                    this.chooseChess(index, 'wolf', 1);
+                } else if (ele.type === 'space') {
+                    this.moveChess(index);
+                } else if (ele.type === 'sheep') {
+                    this.eatSheep(index);
+                }
             }
         }
 
@@ -203,22 +301,30 @@ export default class Game extends Component {
                         // }}
                         onClick={this.handleClick.bind(this)}
                         renderItem={
-                            dataItem => (
+                            (dataItem, index) => (
                                 <div style={{
                                     width: '100%',
                                     height: '100%'
                                 }}>
                                     {
                                         dataItem.icon ?
-                                            <img src={dataItem.icon}
-                                                 style={{width: '70%', height: '70%', margin: '15%'}} alt=""/> : ''
+                                            <img
+                                                className={
+                                                    classnames({
+                                                        [styles.choose_this]: this.state.activeChess.index === index
+                                                    })
+                                                }
+                                                src={dataItem.icon}
+                                                style={{width: '70%', height: '70%', margin: '15%'}}
+                                                alt=""
+                                            /> : ''
                                     }
                                 </div>
                             )
                         }
                     />
                 </div>
-                {this.state.wolfIndex.length < 3 ? '' :
+                {(this.state.camp === 'wolf' && this.state.wolfIndex.length) < 3 ? '' :
                     <Button
                         className={styles.createWolf}
                         type="primary"

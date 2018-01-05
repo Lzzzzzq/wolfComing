@@ -54,6 +54,13 @@ export default {
                             payload: data
                         });
                         break;
+                    case 'chessMove':
+                        console.log(data);
+                        // dispatch({
+                        //     type: 'chessMoveActive',
+                        //     payload: data
+                        // });
+                        break;
                 }
             })
         },
@@ -117,6 +124,15 @@ export default {
                 ...state,
                 gameInfo: gameInfo
             }
+        },
+        chessMoveActive(state, payload){
+            let gameInfo = state.gameInfo;
+            gameInfo.chessMoveData = payload.payload.chessMoveData;
+            gameInfo.camp = payload.payload.camp;
+            console.log(gameInfo);
+            return {
+                ...state
+            }
         }
     },
 
@@ -144,8 +160,11 @@ export default {
             yield call(socket.getGameInfo, payload);
         },
         *createWolf({payload}, {call, put}){
-            console.log(payload);
             yield call(socket.createWolf, payload)
+        },
+        *chessMove({payload}, {call, put}){
+            console.log(payload);
+            yield call(socket.chessMove, payload)
         }
     }
 

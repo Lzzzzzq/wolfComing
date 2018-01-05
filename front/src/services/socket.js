@@ -32,6 +32,13 @@ export function socketListen(action) { // socket监听
             type: 'createWolf',
             gameInfo: data
         })
+    });
+    socket.on('chessMove', function (data) {
+        console.log(data);
+        action({
+            type: 'chessMove',
+            gameData: data
+        })
     })
 }
 
@@ -76,6 +83,13 @@ export function createWolf(gameState) {
     return new Promise((resolve, reject) => {
         console.log(gameState);
         socket.emit('createWolf', gameState);
+        resolve();
+    })
+}
+
+export function chessMove(data) {
+    return new Promise((resolve, reject) => {
+        socket.emit('chessMove', data);
         resolve();
     })
 }
